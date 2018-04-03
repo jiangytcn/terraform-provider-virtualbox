@@ -20,8 +20,8 @@ import (
 
 	multierror "github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform/helper/schema"
+	vboxgo "github.com/jiangytcn/virtualbox-go"
 	vbox "github.com/pyToshka/go-virtualbox"
-	vboxgo "github.com/yacloud-io/virtualbox-go"
 )
 
 var (
