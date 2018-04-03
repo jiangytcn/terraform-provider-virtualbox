@@ -2,8 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"github.com/dustin/go-humanize"
-	"github.com/hashicorp/terraform/helper/resource"
 	"log"
 	"os"
 	"os/user"
@@ -12,13 +10,18 @@ import (
 	"sync"
 	"time"
 
-	multierror "github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/terraform/helper/schema"
-	vbox "github.com/pyToshka/go-virtualbox"
+	"github.com/dustin/go-humanize"
+	"github.com/hashicorp/terraform/helper/resource"
+
 	"io"
 	"net/http"
 	"os/exec"
 	"runtime"
+
+	multierror "github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform/helper/schema"
+	vbox "github.com/pyToshka/go-virtualbox"
+	vboxgo "github.com/yacloud-io/virtualbox-go"
 )
 
 var (
@@ -232,8 +235,12 @@ func resourceVMCreate(d *schema.ResourceData, meta interface{}) error {
 		setuiid := exec.Command(VBM + "internalcommands sethduuid " + src)
 		err := setuiid.Run()
 		imageOpMutex.Lock() // Sequentialize image cloning to improve disk performance
+		errCleanUP := vboxgo.CleanUP()
 		err = vbox.CloneHD(src, target)
 		imageOpMutex.Unlock()
+		if errCleanUP != nil {
+			log.Printf("[ERROR] Cleanup orphaned disk before disk clone: %s", errCleanUP.Error())
+		}
 		if err != nil {
 			log.Printf("[ERROR] Clone *.vdi and *.vmdk to VM folder: %s", err.Error())
 			return err

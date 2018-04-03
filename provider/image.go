@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"sort"
 
 	"crypto/md5"
 	"crypto/sha1"
@@ -66,6 +67,9 @@ func gatherDisks(path string) ([]string, error) {
 		log.Printf("[ERROR] Get *.vmdk in path '%s': %s", path, err.Error())
 		return nil, err
 	}
+	sort.Slice(VMDKs, func(i, j int) bool {
+		return len(VMDKs[i]) < len(VMDKs[j])
+	})
 	disks := append(VDIs, VMDKs...)
 	if len(disks) == 0 {
 		err = fmt.Errorf("No VM disk files (*.vdi, *.vmdk) found in path '%s'", path)
